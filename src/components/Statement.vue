@@ -1,12 +1,38 @@
 <template>
   <b-container>
-    <b-button variant="dark"
-      ><router-link to="/statement/add">Добавить</router-link>
-    </b-button>
+    <div class="statement-control">
+      <b-button variant="dark"
+        ><router-link to="/statement/add">Добавить</router-link>
+      </b-button>
+      <div>
+        <b-form-input
+          size="sm"
+          class="mr-sm-2"
+          placeholder="Search"
+          v-model="search"
+        ></b-form-input>
+        <b-button size="sm" type="submit" @click="sortItems(this.search)"
+          ><b-icon icon="search"></b-icon
+        ></b-button>
+      </div>
+    </div>
     <div class="journal-table overflow-auto">
       <b-table
+        v-if="!searchMode"
         id="my-table"
         :items="items"
+        :fields="fields"
+        selectable
+        :select-mode="selectMode"
+        ref="selectableTable"
+        @row-selected="onRowSelected"
+        :per-page="perPage"
+        :current-page="currentPage"
+      ></b-table>
+      <b-table
+        v-else
+        id="my-table"
+        :items="sortedItems"
         :fields="fields"
         selectable
         :select-mode="selectMode"
@@ -32,6 +58,9 @@ export default {
   data() {
     return {
       items: [],
+      sortedItems: [],
+      search: '',
+      searchMode: false,
       perPage: 8,
       currentPage: 1,
       selectMode: 'single',
@@ -45,27 +74,11 @@ export default {
       ],
     }
   },
-  computed: {
-    // rows() {
-    //   return this.items.length
-    // },
-    // perPage() {
-    //   if (this.items.length < 5) {
-    //     return this.this.items.length
-    //   }
-    //   return 5
-    // },
-    // storeItems(){
-    //   return this.$store.getters.getApp
-    // }
-  },
+  computed: {},
   created() {
-    this.getData()
+    this.items = this.$store.getters.getApp
   },
   methods: {
-    getData() {
-      this.items = this.$store.getters.getApp
-    },
     onRowSelected(items) {
       console.log('Select', items[0])
       let item = items[0]
@@ -73,7 +86,22 @@ export default {
       this.$router.push({
         path: `/statement/${itemId}`,
       })
-      // this.$refs.selectableTable.clearSelected()
+    },
+    sortItems(value) {
+      if (value != '') {
+        this.searchMode = true
+        this.sortedItems = this.items.filter((item) =>
+          item.name.toLowerCase().includes(value.toLowerCase()),
+        )
+      } else {
+        this.searchMode = false
+        this.sortedItems = []
+      }
+    },
+  },
+  watch: {
+    search: function() {
+      this.sortItems(this.search)
     },
   },
 }
@@ -84,6 +112,23 @@ export default {
 .container
   padding-top: 5%
 
+.statement-control
+  display: flex
+  justify-content: space-between
+  div
+    display: flex
+    align-items: center
+  .form
+    display: flex
+  input
+    width: 200px
 .journal-table
   margin-top: 25px
+button
+  a
+    color: white
+    text-decoration: none
+    &:hover
+      text-decoration: none
+      color: white
 </style>
