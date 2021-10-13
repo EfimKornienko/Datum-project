@@ -53,11 +53,12 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   name: 'Statement',
   data() {
     return {
-      items: [],
+      //items: [],
       sortedItems: [],
       search: '',
       searchMode: false,
@@ -74,9 +75,13 @@ export default {
       ],
     }
   },
-  computed: {},
+  computed: {
+    ...mapState({
+      items: (state) => state.application,
+    }),
+  },
   created() {
-    this.items = this.$store.getters.getApp
+    //this.items = this.$store.getters.getApp
   },
   methods: {
     onRowSelected(items) {

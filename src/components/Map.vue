@@ -6,7 +6,7 @@
       @click="getCoordinateFromPixel"
     >
       <vl-view
-        :zoom.sync="zoom"
+        :zoom.sync="zoomLocal"
         :center.sync="center"
         :rotation.sync="rotation"
       ></vl-view>
@@ -19,24 +19,14 @@
           <vl-overlay :position="app.location">
             <template>
               <div
-                v-if="app.priority == 1"
                 :id="`popover-${app.id}`"
                 class="overlay-content red"
-              ></div>
-              <div
-                v-if="app.priority == 2"
-                :id="`popover-${app.id}`"
-                class="overlay-content orange"
-              ></div>
-              <div
-                v-if="app.priority == 3"
-                :id="`popover-${app.id}`"
-                class="overlay-content blue"
-              ></div>
-              <div
-                v-if="app.priority == 4"
-                :id="`popover-${app.id}`"
-                class="overlay-content white"
+                :class="{
+                  red: app.priority == 1,
+                  orange: app.priority == 2,
+                  blue: app.priority == 3,
+                  white: app.priority == 4,
+                }"
               ></div>
               <b-popover
                 :target="`popover-${app.id}`"
@@ -71,10 +61,22 @@ export default {
         return true
       },
     },
+    x: {
+      type: String,
+      default: null,
+    },
+    y: {
+      type: String,
+      default: null,
+    },
+    zoom: {
+      type: String,
+      default: null,
+    },
   },
   data() {
     return {
-      zoom: 12,
+      zoomLocal: 12,
       center: [4418277.6114082355, 5980677.411448954],
       rotation: 0,
       editPoint: null,
@@ -86,8 +88,62 @@ export default {
   },
   methods: {
     getCoordinateFromPixel(pixel) {
-      this.$store.dispatch('setPoint', pixel.coordinate)
       this.editPoint = pixel.coordinate
+      this.$emit('setCoords', pixel.coordinate)
+    },
+  },
+  mounted() {
+    if (this.zoom != undefined) {
+      this.zoomLocal = Number(this.zoom)
+    }
+    if (this.x != undefined) {
+      this.center[0] = this.x
+    }
+    if (this.y != undefined) {
+      this.center[1] = this.y
+    }
+    if (
+      (this.zoom == undefined || this.x == undefined || this.y == undefined) &&
+      this.showPoints
+    ) {
+      this.$router.push({
+        name: 'mapXYZ',
+        params: {
+          x: this.center[0].toString(),
+          y: this.center[1].toString(),
+          zoom: this.zoomLocal.toString(),
+        },
+      })
+    }
+  },
+  watch: {
+    zoomLocal: function(val) {
+      if (Number(val) !== Number(this.zoom) && this.showPoints) {
+        this.$router.push({
+          name: 'mapXYZ',
+          params: {
+            x: this.center[0].toString(),
+            y: this.center[1].toString(),
+            zoom: this.zoomLocal.toString(),
+          },
+        })
+      }
+    },
+    center: function(val) {
+      if (
+        (Number(val[0]) !== Number(this.x) ||
+          Number(val[1] !== Number(this.y))) &&
+        this.showPoints
+      ) {
+        this.$router.push({
+          name: 'mapXYZ',
+          params: {
+            x: this.center[0].toString(),
+            y: this.center[1].toString(),
+            zoom: this.zoomLocal.toString(),
+          },
+        })
+      }
     },
   },
 }

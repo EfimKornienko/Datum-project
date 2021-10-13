@@ -29,11 +29,6 @@
 </template>
 
 <style lang="sass" scoped>
-// #nav
-//   padding-top: 5vh
-//   display: flex
-//   flex-wrap: wrap
-//   justify-content: space-between
 .nav-content
   button
     margin: 0px 5px 0px 5px

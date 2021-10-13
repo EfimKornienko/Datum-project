@@ -3,11 +3,18 @@ import VueRouter from 'vue-router'
 import Statement from '@/components/Statement.vue'
 import AddModal from '@/components/AddModal.vue'
 import EditModal from '@/components/EditModal.vue'
-import Map from '@/components/Map.vue'
+import MapComponent from '@/components/Map.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    beforeEnter: (to, from, next) => {
+      next({ name: 'statement' })
+    },
+  },
   {
     path: '/statement',
     name: 'statement',
@@ -27,9 +34,28 @@ const routes = [
     ],
   },
   {
+    path: '/map/:x/:y/:zoom',
+    name: 'mapXYZ',
+    component: MapComponent,
+    props: true,
+  },
+  {
+    path: '/map/:x/:y',
+    name: 'mapXY',
+    component: MapComponent,
+    props: true,
+  },
+  {
+    path: '/map/:x',
+    name: 'mapX',
+    component: MapComponent,
+    props: true,
+  },
+  {
     path: '/map',
     name: 'map',
-    component: Map,
+    component: MapComponent,
+    props: true,
   },
 ]
 

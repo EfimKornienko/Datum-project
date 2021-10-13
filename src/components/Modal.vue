@@ -13,7 +13,7 @@
     ></b-form-input>
     <p>Укажите местоположение</p>
     <div class="map">
-      <Map :showPoints="false" />
+      <Map :showPoints="false" @setCoords="setCoords" />
     </div>
     <b-form-select v-model="app.type" :options="types" required></b-form-select>
     <b-form-select
@@ -36,8 +36,13 @@
       <b-button size="sm" variant="dark" @click="cancel()">
         <router-link to="/statement">Назад</router-link>
       </b-button>
-      <div v-if="validForm">
-        <b-button size="sm" variant="success" @click="ok(), pushApp(app)">
+      <div>
+        <b-button
+          :disabled="!validForm"
+          size="sm"
+          variant="success"
+          @click="ok(), pushApp(app)"
+        >
           <router-link to="/statement">Ок</router-link>
         </b-button>
       </div>
@@ -71,12 +76,13 @@ export default {
       completeForm: false,
       app: {
         address: null,
-        location: [],
+        location: null,
         type: null,
         priority: null,
         name: null,
         phone: null,
       },
+      saveApp: null,
       types: [
         { text: 'Тип', value: null },
         { text: 'Порыв', value: 'Порыв' },
@@ -97,7 +103,10 @@ export default {
   },
   created() {
     if (!this.addMode) {
-      this.app = this.$store.getters.getApp.find((el) => el.id == this.id)
+      this.app = Object.assign(
+        {},
+        this.$store.getters.getApp.find((el) => el.id == this.id),
+      )
     }
   },
   computed: {
@@ -112,7 +121,6 @@ export default {
   },
   methods: {
     pushApp(app) {
-      this.app.location = this.$store.getters.getPoint
       if (this.addMode) {
         let cloneApp = Object.assign({}, app)
         cloneApp.id = this.$store.getters.getApp.length + 1
@@ -123,6 +131,9 @@ export default {
       } else {
         this.$store.dispatch('editApp', app)
       }
+    },
+    setCoords(coord) {
+      this.app.location = coord
     },
   },
   watch: {
